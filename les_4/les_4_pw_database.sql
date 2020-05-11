@@ -51,7 +51,17 @@ DESC vk.users ;
 -- день рождения создание профиля править данные с заменой !!
 
 SELECT * FROM vk.profiles WHERE birthday > updated_at ;
+
+SELECT profiles.birthday, users.created_at  FROM vk.profiles JOIN vk.users 
+	WHERE vk.profiles.birthday > vk.users.created_at AND vk.profiles.user_id = vk.users.id ;	-- получение строк где значение дня рождения больше значения регистрации пользователя (108 строк)
+
 DESC vk.profiles;
+DESC vk.users ;
+
+UPDATE vk.profiles, vk.users 
+	SET vk.profiles.birthday = vk.profiles.birthday  - INTERVAL 10 YEAR 
+	WHERE vk.profiles.birthday > vk.users.created_at AND vk.profiles.user_id = vk.users.id ; -- обновление данных значения дня рождения
+
 SELECT * FROM  vk.profiles ;
 -- добавления данных  photo_id
 UPDATE vk.profiles SET photo_id = FLOOR(1 + RAND() * 100 ); 
@@ -156,7 +166,13 @@ SELECT * FROM vk.friendship WHERE friend_id = user_id ; -- 0 пунктов об
 DESC vk.friendship ;
 
 SELECT * FROM vk.friendship WHERE requested_at > confirmed_at ;
+ALTER TABLE vk.friendship CHANGE COLUMN requested_at requested_at DATETIME ; -- изменение DESC requested_at что бы данные не обновились по функции NOW()
+SELECT NOW() - INTERVAL 10 YEAR;
 
+UPDATE vk.friendship SET requested_at = requested_at - INTERVAL 10 YEAR 
+							WHERE requested_at > confirmd_at ;	-- обновление данных requested_at > confirmed_at (по шаблону: requested_at - 10 лет)
+
+ALTER TABLE vk.friendship CHANGE COLUMN requested_at requested_at DATETIME DEFAULT NOW(); -- возвращение requested_at изначального DESC
 -- Таблица vk.friendship_statuses
 SELECT * FROM vk.friendship_statuses;
 DESC vk.friendship_statuses ;
