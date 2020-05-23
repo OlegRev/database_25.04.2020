@@ -114,6 +114,11 @@ FROM users, orders
 	WHERE users.id = orders.user_id
 	GROUP BY users.id;
 
+SELECT users.id, users.name 
+FROM users JOIN orders 
+	ON users.id = orders.user_id
+	GROUP BY users.id;
+
 /*2.Выведите список товаров products и разделов catalogs,
 который соответствует товару.
 */
@@ -128,6 +133,11 @@ SELECT p.name ,
 	c.name AS catalogs
 FROM products p ,catalogs c
 	WHERE c.id = p.catalog_id ;
+
+SELECT p.name ,
+	c.name AS catalogs
+FROM products p JOIN catalogs c
+	ON c.id = p.catalog_id ;
 
 /*3.(по желанию) Пусть имеется таблица рейсов
 flights (id, from, to) и таблица городов cities (label, name).
@@ -185,5 +195,16 @@ SELECT f.id,
 	c.name
 FROM flights f JOIN cities c
 	ON f.from_city = c.label OR f.to_city =c.label ;
+
+SELECT f.id,
+	c.name AS 'из города',
+	c2.name AS 'в город'
+FROM flights f 
+	JOIN cities c
+	JOIN cities c2 
+	ON f.from_city = c.label 
+		AND f.to_city = c2.label;
+
+
 	
 
