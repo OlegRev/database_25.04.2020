@@ -239,12 +239,13 @@ FROM profiles
 	ORDER BY user_age 
 	LIMIT 10; -- id и возраст 10 самых молодых пользователей
 	
-SELECT user_id 
+SELECT user_id , 
 FROM profiles  
 	ORDER BY TIMESTAMPDIFF(YEAR,birthday,NOW()) 
 	LIMIT 10; -- id 10 самых молодых пользователей
 	
 SELECT * FROM target_types ;
+
 
 SELECT COUNT(likes.target_id) 
 FROM likes, profiles , target_types 
@@ -253,6 +254,39 @@ FROM likes, profiles , target_types
 	ORDER BY TIMESTAMPDIFF(YEAR,birthday,NOW()) 
 	LIMIT 10;
 
+
+desc likes ;
+SELECT * FROM target_types tt ;
+
+SELECT COUNT(id) AS sum_likes, target_id 
+FROM likes 
+	WHERE target_type_id = (
+		SELECT id FROM target_types WHERE name = 'users'
+	) 
+	AND target_id IN (
+		SELECT user_id 
+		FROM profiles p2 
+			ORDER BY TIMESTAMPDIFF(YEAR,birthday,NOW())
+	)
+	GROUP BY target_id
+	ORDER BY sum_likes
+	LIMIT 10;
+
+/*Задание 3:
+В решении вы используете неявный JOIN, 
+но есть ошибка в логике - не будут учтены пользователи, 
+у которых нет дайков, поэтому результат неверен.
+*/
+
+SELECT user_id, 
+	TIMESTAMPDIFF(YEAR, birthday, NOW()) AS age ,
+	(SELECT COUNT(target_id) FROM likes l2 
+		WHERE target_type_id = (SELECT id FROM target_types WHERE name LIKE 'users') 
+			AND target_id = p.user_id
+	) AS likes
+FROM profiles p 
+	ORDER BY age
+	LIMIT 10;
 
 /*4. Определить кто больше поставил лайков (вего) 
  - мужчины или женщины?
@@ -299,6 +333,30 @@ SELECT (
 	) AS 'likes in usergender = w'
 FROM profiles,likes 
 	LIMIT 1;
+
+
+
+/*Задание 4:
+Хорошо, но с группировкой можно сделать проще.
+*/
+
+
+SELECT COUNT(likes.user_id) AS likes, profiles.gender 
+FROM profiles, likes 
+	WHERE profiles.user_id = likes.user_id 
+	GROUP BY profiles.gender; 
+
+desc likes ;
+-- через вложенные запросы
+
+SELECT COUNT(user_id) AS likes,
+	(SELECT gender FROM profiles WHERE user_id = l.user_id ) AS gender
+FROM likes l 
+	WHERE l.user_id IN (SELECT user_id FROM profiles p2 )
+	GROUP BY gender ;
+
+
+
 
 /*5. Найти 10 пользователей, которые проявляют наименьшую активность в
 использовании социальной сети
