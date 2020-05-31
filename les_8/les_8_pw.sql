@@ -85,13 +85,13 @@ GROUP BY users.id
 	  
 -- JOIN
 	 
-SELECT DISTINCT
+SELECT 
 	u.id,
 	CONCAT(u.first_name, ' ', u.last_name) AS user_name,
-	COUNT(l.user_id ) +
-	COUNT(m.user_id) +
-	COUNT(ms.from_user_id) +
-	COUNT(p.user_id) AS overall_activity
+	COUNT(DISTINCT l.id ) +
+	COUNT(DISTINCT m.id ) +
+	COUNT(DISTINCT ms.id ) +
+	COUNT(DISTINCT p.id ) AS overall_activity
 FROM users u 
 	LEFT JOIN likes l
 		ON l.user_id = u.id
@@ -101,6 +101,6 @@ FROM users u
 		ON ms.from_user_id = u.id
 	LEFT JOIN posts p
 		ON p.user_id = u.id
-GROUP BY user_name , u.id
+GROUP BY u.id, user_name
 ORDER BY overall_activity
 	LIMIT 10;
