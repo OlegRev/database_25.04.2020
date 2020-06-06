@@ -63,16 +63,16 @@ FROM communities_users cu
 
 SELECT DISTINCT c.name ,
 	(SELECT COUNT(DISTINCT cu.user_id) FROM communities_users cu)/
-	(SELECT COUNT(DISTINCT cu.communities_id)FROM communities_users cu) AS average_users_in_community,
+	(SELECT COUNT(DISTINCT c.id)FROM communities c) AS average_users_in_community,
 	MIN(p.birthday) OVER(PARTITION BY cu.communities_id) AS min_birthday_in_community,
 	MAX(p.birthday) OVER(PARTITION BY cu.communities_id) AS max_birthday_in_community,
 	COUNT(cu.user_id) OVER(PARTITION BY cu.communities_id) AS users_in_communities,
 	COUNT(cu.user_id) OVER() AS total_in_communities,
-  	COUNT(p.user_id) OVER() AS total_users,
-  	(COUNT(cu.user_id) OVER() / COUNT(p.user_id) OVER()) * 100 AS '%%'
+  	(SELECT COUNT(*) FROM profiles) AS total_users,
+  	(COUNT(cu.user_id) OVER() / (SELECT COUNT(*) FROM profiles)) * 100 AS '%%'
 FROM communities c
-	JOIN communities_users cu
+	LEFT JOIN communities_users cu
 		ON c.id = cu.communities_id
-	RIGHT JOIN profiles p
+	LEFT JOIN profiles p
 		ON cu.user_id = p.user_id ;
 	
